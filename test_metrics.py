@@ -40,50 +40,55 @@ def get_gt_image(path):
 
 
 def test_image(model, image_path):
-	img_transforms = transforms.Compose([
-		transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
-	])
-	size_transform = Compose([
-		PadIfNeeded(736, 1280)
-	])
-	crop = CenterCrop(720, 1280)
-	img = cv2.imread(image_path + '_blur_err.png')
-	img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-	img_s = size_transform(image=img)['image']
-	img_tensor = torch.from_numpy(np.transpose(img_s / 255, (2, 0, 1)).astype('float32'))
-	img_tensor = img_transforms(img_tensor)
-	with torch.no_grad():
-		img_tensor = Variable(img_tensor.unsqueeze(0).cuda())
-		result_image = model(img_tensor)
-	result_image = result_image[0].cpu().float().numpy()
-	result_image = (np.transpose(result_image, (1, 2, 0)) + 1) / 2.0 * 255.0
-	result_image = crop(image=result_image)['image']
-	result_image = result_image.astype('uint8')
-	# gt_image = get_gt_image(image_path)
-	gt_image = cv2.cvtColor(cv2.imread(image_path + '_ref.png'), cv2.COLOR_BGR2RGB)
-	_, filename = os.path.split(image_path)
-	psnr = PSNR(result_image, gt_image)
-	pilFake = Image.fromarray(result_image)
-	pilReal = Image.fromarray(gt_image)
-	ssim = SSIM(pilFake).cw_ssim_value(pilReal)
-	return psnr, ssim
+    img_transforms = transforms.Compose([
+    	transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+    ])
+    size_transform = Compose([
+    	PadIfNeeded(736, 1280)
+    ])
+    crop = CenterCrop(720, 1280)
+    img = cv2.imread(image_path + '_blur_err.png')
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    img_s = size_transform(image=img)['image']
+    img_tensor = torch.from_numpy(np.transpose(img_s / 255, (2, 0, 1)).astype('float32'))
+    img_tensor = img_transforms(img_tensor)
+    with torch.no_grad():
+        img_tensor = Variable(img_tensor.unsqueeze(0).cuda())
+        result_image = model(img_tensor)
+    result_image = result_image[0].cpu().float().numpy()
+    result_image = (np.transpose(result_image, (1, 2, 0)) + 1) / 2.0 * 255.0
+    result_image = crop(image=result_image)['image']
+    result_image = result_image.astype('uint8')
+    # gt_image = get_gt_image(image_path)
+    gt_image = cv2.cvtColor(cv2.imread(image_path + '_ref.png'), cv2.COLOR_BGR2RGB)
+    _, filename = os.path.split(image_path)
+    psnr = PSNR(result_image, gt_image)
+    pilFake = Image.fromarray(result_image)
+    pilReal = Image.fromarray(gt_image)
+    ssim = SSIM(pilFake).cw_ssim_value(pilReal)
+    if file[-2:] == '01':
+        print('test_{}: PSNR = {} dB, SSIM = {}'.format(file, cur_psnr, cur_ssim))
+        cv2.imwrite(os.path.join('./test', 'test_'+image_path[-6:]+'.png'), result_image)
+    return psnr, ssim
 
 
 def test(model, files):
-	psnr = 0
-	ssim = 0
-	for file in tqdm.tqdm(files):
-		cur_psnr, cur_ssim = test_image(model, file)
-		psnr += cur_psnr
-		ssim += cur_ssim
-	print("PSNR = {}".format(psnr / len(files)))
-	print("SSIM = {}".format(ssim / len(files)))
+    psnr = 0
+    ssim = 0
+    for file in tqdm.tqdm(files):
+        cur_psnr, cur_ssim = test_image(model, file)
+        psnr += cur_psnr
+        ssim += cur_ssim
+    print("PSNR = {}".format(psnr / len(files)))
+    print("SSIM = {}".format(ssim / len(files)))
 
 
 if __name__ == '__main__':
+    if not os.path.exists('./test'):
+        os.makedirs('./test')
     args = get_args()
     with open('config/config.yaml') as cfg:
-    	config = yaml.load(cfg)
+        config = yaml.load(cfg)
     model = get_generator(config['model'])
     model.load_state_dict(torch.load(args.weights_path)['model'])
     gpu_id = config['gpu_id']
