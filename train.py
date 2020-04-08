@@ -28,6 +28,8 @@ class Trainer:
         self.adv_lambda = config['model']['adv_lambda']
         self.metric_counter = MetricCounter(config['experiment_desc'])
         self.warmup_epochs = config['warmup_num']
+        gpu_id = self.config['gpu_id']
+        self.device = torch.device('cuda:{}'.format(gpu_id) if (torch.cuda.is_available() and gpu_id > 0) else "cpu")
 
     def train(self):
         self._init_params()
@@ -158,7 +160,7 @@ class Trainer:
     def _init_params(self):
         self.criterionG, criterionD = get_loss(self.config['model'])
         self.netG, netD = get_nets(self.config['model'])
-        self.netG.cuda()
+        self.netG.to(self.device)
         self.adv_trainer = self._get_adversarial_trainer(self.config['model']['d_name'], netD, criterionD)
         self.model = get_model(self.config['model'])
         self.optimizer_G = self._get_optim(filter(lambda p: p.requires_grad, self.netG.parameters()))

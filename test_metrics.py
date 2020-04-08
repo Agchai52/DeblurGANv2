@@ -81,19 +81,19 @@ def test(model, files):
 
 
 if __name__ == '__main__':
-	args = get_args()
-	with open('config/config.yaml') as cfg:
-		config = yaml.load(cfg)
-	model = get_generator(config['model'])
-	model.load_state_dict(torch.load(args.weights_path)['model'])
-	model = model.cuda()
-	# filenames = sorted(glob.glob(args.img_folder + '/test' + '/blur/**/*.png', recursive=True))
-
-	# Test AidedDeblur #
-	f_test = open("./dataset/AidedDeblur/test_instance_names.txt", "r")
-	test_data = f_test.readlines()
-	test_data = [line.rstrip() for line in test_data]
-	f_test.close()
-	filenames = test_data
-
-	test(model, filenames)
+    args = get_args()
+    with open('config/config.yaml') as cfg:
+    	config = yaml.load(cfg)
+    model = get_generator(config['model'])
+    model.load_state_dict(torch.load(args.weights_path)['model'])
+    gpu_id = config['gpu_id']
+    device = torch.device('cuda:{}'.format(gpu_id) if (torch.cuda.is_available() and gpu_id > 0) else "cpu")
+    model = model.to(device)
+    # filenames = sorted(glob.glob(args.img_folder + '/test' + '/blur/**/*.png', recursive=True))
+    # Test AidedDeblur #
+    f_test = open("./dataset/AidedDeblur/test_instance_names.txt", "r")
+    test_data = f_test.readlines()
+    test_data = [line.rstrip() for line in test_data]
+    f_test.close()
+    filenames = test_data
+    test(model, filenames)
