@@ -68,6 +68,16 @@ class PairedDataset(Dataset):
         self.corrupt_fn = corrupt_fn
         self.transform_fn = transform_fn
         self.normalize_fn = normalize_fn
+
+        # Train AidedDeblur #
+        f_train = open("./dataset/AidedDeblur/train_instance_names.txt", "r")
+        train_data = f_train.readlines()
+        train_data = [line.rstrip() for line in train_data]
+        f_test.close()
+
+        self.data_a = train_data
+        self.data_b = train_data
+
         logger.info(f'Dataset has been created with {len(self.data_a)} samples')
 
         if preload:
@@ -105,7 +115,7 @@ class PairedDataset(Dataset):
         return len(self.data_a)
 
     def __getitem__(self, idx):
-        a, b = self.data_a[idx], self.data_b[idx]
+        a, b = self.data_a[idx] + '_blur_err.png', self.data_b[idx] + '_ref.png'
         if not self.preload:
             a, b = map(_read_img, (a, b))
         a, b = self.transform_fn(a, b)

@@ -47,7 +47,7 @@ def test_image(model, image_path):
 		PadIfNeeded(736, 1280)
 	])
 	crop = CenterCrop(720, 1280)
-	img = cv2.imread(image_path)
+	img = cv2.imread(image_path + '_blur_err.png')
 	img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 	img_s = size_transform(image=img)['image']
 	img_tensor = torch.from_numpy(np.transpose(img_s / 255, (2, 0, 1)).astype('float32'))
@@ -59,7 +59,8 @@ def test_image(model, image_path):
 	result_image = (np.transpose(result_image, (1, 2, 0)) + 1) / 2.0 * 255.0
 	result_image = crop(image=result_image)['image']
 	result_image = result_image.astype('uint8')
-	gt_image = get_gt_image(image_path)
+	# gt_image = get_gt_image(image_path)
+	gt_image = cv2.cvtColor(cv2.imread(image_path + '_ref.png'), cv2.COLOR_BGR2RGB)
 	_, filename = os.path.split(image_path)
 	psnr = PSNR(result_image, gt_image)
 	pilFake = Image.fromarray(result_image)
@@ -86,5 +87,13 @@ if __name__ == '__main__':
 	model = get_generator(config['model'])
 	model.load_state_dict(torch.load(args.weights_path)['model'])
 	model = model.cuda()
-	filenames = sorted(glob.glob(args.img_folder + '/test' + '/blur/**/*.png', recursive=True))
+	# filenames = sorted(glob.glob(args.img_folder + '/test' + '/blur/**/*.png', recursive=True))
+
+	# Test AidedDeblur #
+	f_test = open("./dataset/AidedDeblur/test_instance_names.txt", "r")
+	test_data = f_test.readlines()
+	test_data = [line.rstrip() for line in test_data]
+	f_test.close()
+	filenames = test_data
+
 	test(model, filenames)
