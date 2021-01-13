@@ -90,11 +90,11 @@ if __name__ == '__main__':
     if not os.path.exists('./test'):
         os.makedirs('./test')
     #args = get_args()
-    weights_path = 'pretrainedmodels/inceptionresnetv2-520b38e4.pth'
+    weights_path = 'pretrainedmodels/inceptionresnetv2.h5'
     with open('config/config.yaml') as cfg:
         config = yaml.load(cfg)
     model = get_generator(config['model'])
-    model.load_state_dict(torch.load(weights_path))  # ['model'])
+    model.load_state_dict(torch.load(weights_path)['model'])
     gpu_id = config['gpu_id']
     device = torch.device('cuda:{}'.format(gpu_id) if (torch.cuda.is_available() and gpu_id > 0) else "cpu")
     model = model.to(device)
