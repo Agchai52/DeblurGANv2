@@ -90,7 +90,7 @@ if __name__ == '__main__':
     if not os.path.exists('./test'):
         os.makedirs('./test')
     #args = get_args()
-    weights_path = 'inceptionresnetv2.h5'
+    weights_path = 'pretrainedmodels/inceptionresnetv2-520b38e4.pth'
     with open('config/config.yaml') as cfg:
         config = yaml.load(cfg)
     model = get_generator(config['model'])
