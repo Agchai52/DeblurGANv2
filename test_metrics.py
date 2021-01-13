@@ -15,6 +15,7 @@ from albumentations import Compose, CenterCrop, PadIfNeeded
 from PIL import Image
 from ssim.ssimlib import SSIM
 from models.networks import get_generator
+import time
 
 
 def get_args():
@@ -61,12 +62,14 @@ def test_image(model, image_path):
     result_image = result_image.astype('uint8')
     # gt_image = get_gt_image(image_path)
     gt_image = cv2.cvtColor(cv2.imread(image_path + '_ref.png'), cv2.COLOR_BGR2RGB)
-    _, filename = os.path.split(image_path)
+    _, file = os.path.split(image_path)
     psnr = PSNR(result_image, gt_image)
     pilFake = Image.fromarray(result_image)
     pilReal = Image.fromarray(gt_image)
     ssim = SSIM(pilFake).cw_ssim_value(pilReal)
-    if file[-2:] == '01':
+    sample_img_names = set(["010221", "024071", "033451", "051271", "060201",
+                            "070041", "090541", "100841", "101031", "113201"])
+    if file[-3:] == '001' or file in sample_img_names:
         print('test_{}: PSNR = {} dB, SSIM = {}'.format(file, cur_psnr, cur_ssim))
         cv2.imwrite(os.path.join('./test', 'test_'+image_path[-6:]+'.png'), result_image)
     return psnr, ssim
@@ -101,4 +104,9 @@ if __name__ == '__main__':
     test_data = [line.rstrip() for line in test_data]
     f_test.close()
     filenames = test_data
+    start_time = time.time()
     test(model, filenames)
+    total_time = time.time() - start_time
+    ave_time = total_time / len(test_data)
+    print("Average Processing time = {}".format(ave_time))
+
