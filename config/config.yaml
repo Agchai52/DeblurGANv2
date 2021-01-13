@@ -66,4 +66,4 @@ scheduler:
   start_epoch: 50
   min_lr: 0.0000001
 
-gpu_id: 2
+gpu_id: 0
