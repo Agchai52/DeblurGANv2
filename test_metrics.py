@@ -97,7 +97,7 @@ if __name__ == '__main__':
     model.load_state_dict(torch.load(weights_path)['model'])
     gpu_id = config['gpu_id']
     device = torch.device('cuda:{}'.format(gpu_id) if (torch.cuda.is_available() and gpu_id > 0) else "cpu")
-    model = model.to(device)
+    model = model.cuda()  # to(device)
     # filenames = sorted(glob.glob(args.img_folder + '/test' + '/blur/**/*.png', recursive=True))
     # Test AidedDeblur #
     f_test = open("./dataset/AidedDeblur/test_instance_names.txt", "r")
