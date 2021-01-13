@@ -70,7 +70,7 @@ def test_image(model, image_path):
     sample_img_names = set(["010221", "024071", "033451", "051271", "060201",
                             "070041", "090541", "100841", "101031", "113201"])
     if file[-3:] == '001' or file in sample_img_names:
-        print('test_{}: PSNR = {} dB, SSIM = {}'.format(file, cur_psnr, cur_ssim))
+        print('test_{}: PSNR = {} dB, SSIM = {}'.format(file, psnr, ssim))
         cv2.imwrite(os.path.join('./test', 'test_'+image_path[-6:]+'.png'), result_image)
     return psnr, ssim
 
@@ -82,8 +82,8 @@ def test(model, files):
         cur_psnr, cur_ssim = test_image(model, file)
         psnr += cur_psnr
         ssim += cur_ssim
-    print("PSNR = {}".format(psnr / len(files)))
-    print("SSIM = {}".format(ssim / len(files)))
+    print("Ave PSNR = {}".format(psnr / len(files)))
+    print("Ave SSIM = {}".format(ssim / len(files)))
 
 
 if __name__ == '__main__':
