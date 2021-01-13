@@ -71,7 +71,7 @@ def test_image(model, image_path):
                             "070041", "090541", "100841", "101031", "113201"])
     if file[-3:] == '001' or file in sample_img_names:
         print('test_{}: PSNR = {} dB, SSIM = {}'.format(file, psnr, ssim))
-        result_image = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+        result_image = cv2.cvtColor(result_image, cv2.COLOR_RGB2BGR)
         cv2.imwrite(os.path.join('./test', 'test_'+image_path[-6:]+'.png'), result_image)
     return psnr, ssim
 
